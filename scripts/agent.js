@@ -221,23 +221,24 @@ class Agent {
                 console.log("Victory!");
                 victory_sound.play();
                 this.world.showAllRooms();
+                
+                // Calculate score
                 totalScore = goldCollected + (numOfSteps * (-1)) + dead + arrowUsed;
-                Swal.fire({
-                    position: 'center-start',
-                    title: 'Win!',
-                    html: `<b>Congratulations! You Won! </b><hr> <b>Result</b><br> <div style="padding-top:7px">
-                    Gold Collected: ${goldCollected} <br> Steps:  -${numOfSteps} <br> Arrow Used: ${arrowUsed}
-                    <hr> Total Score: ${totalScore} </div>`,
-                    icon: 'success',
-                    confirmButtonText: 'Restart'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        if (isFixedBoard)
-                            fixedRestart();
-                        else
-                            randomRestart()
-                    }
-                });
+                const scoreData = {
+                    goldScore: goldCollected,
+                    stepPenalty: numOfSteps * (-1),
+                    arrowPenalty: arrowUsed,
+                    deathPenalty: 0,
+                    totalScore: totalScore
+                };
+                
+                // Show victory modal
+                if (typeof showVictoryModal !== 'undefined') {
+                    showVictoryModal(scoreData);
+                } else {
+                    alert(`Victory! Total Score: ${totalScore}`);
+                    restart();
+                }
             }, 1000);
         }
     }
@@ -247,24 +248,24 @@ class Agent {
         this.alive = false;
         dead = -1000;
         defeat_sound.play();
+        
+        // Calculate score
         totalScore = goldCollected + (numOfSteps * (-1)) + dead + arrowUsed;
-        Swal.fire({
-            position: 'center-start',
-            title: 'Lose!',
-            html: `<b>Alas! You lost! </b><hr> <b>Result</b><br> <div style="padding-top:7px">
-            Dead: ${dead} <br> 
-            Gold Collected: ${goldCollected} <br> Steps:  -${numOfSteps} <br> Arrow Used: ${arrowUsed}
-            <hr> Total Score: ${totalScore} </div>`,
-            icon: 'error',
-            confirmButtonText: 'Restart'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                if (isFixedBoard)
-                    fixedRestart();
-                else
-                    randomRestart()
-            }
-        });
+        const scoreData = {
+            goldScore: goldCollected,
+            stepPenalty: numOfSteps * (-1),
+            arrowPenalty: arrowUsed,
+            deathPenalty: dead,
+            totalScore: totalScore
+        };
+        
+        // Show defeat modal
+        if (typeof showDefeatModal !== 'undefined') {
+            showDefeatModal(scoreData);
+        } else {
+            alert(`Game Over! Total Score: ${totalScore}`);
+            restart();
+        }
     }
 
     shoot() {
