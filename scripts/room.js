@@ -88,59 +88,72 @@ class Room {
         strokeWeight(1);
         stroke(30);
         if (this.visible) {
-            image(terrain_image, this.position.x * this.size, this.position.y * this.size, this.size, this.size);
+            // Draw terrain background
+            if (terrain_image) {
+                image(terrain_image, this.position.x * this.size, this.position.y * this.size, this.size, this.size);
+            } else {
+                fill(240, 230, 140); // Sandy background
+                rect(this.position.x * this.size, this.position.y * this.size, this.size, this.size);
+            }
+            
             noFill();
-            square(this.position.x * this.size, this.position.y * this.size, this.size);
+            rect(this.position.x * this.size, this.position.y * this.size, this.size, this.size);
+            
             if (this.objects.size > 0) {
                 this.objects.forEach(obj => {
                     obj.display();
-                    // if(this.attributes.has("Breeze")) {
-                    //     fill(0);
-                    //     let size = this.size / 4 < 20 ? this.size / 4 : 20;
-                    //     textSize(size);
-                    //     textAlign(CENTER, TOP);
-                    //     strokeWeight(0.5);
-                    //     let s = "";
-                    //     this.attributes.forEach((value) => {
-                    //         s += value + "\n"
-                    //     });
-                    //     text(s, this.position.x * this.size, this.position.y * this.size + this.size * 0.1, this.size, this.size - this.size * 0.1);
-                    // }
                 });
             } 
-            else {
+            
+            // Display attribute text for stench/breeze
+            if (this.attributes.size > 0) {
                 fill(0);
-                let size = this.size / 4 < 20 ? this.size / 4 : 20;
+                let size = this.size / 6 < 12 ? this.size / 6 : 12;
                 textSize(size);
-                textAlign(CENTER, TOP);
+                textAlign(LEFT, TOP);
                 strokeWeight(0.5);
                 let s = "";
+                let y_offset = 0;
+                
                 this.attributes.forEach((value) => {
-                    s += value + "\n"
+                    if (value === "Stench" || value === "Breeze") {
+                        s += value.charAt(0) + " ";
+                    }
                 });
-                text(s, this.position.x * this.size, this.position.y * this.size + this.size * 0.1, this.size, this.size - this.size * 0.1);
+                
+                if (s.trim()) {
+                    text(s.trim(), this.position.x * this.size + 5, this.position.y * this.size + 5);
+                }
             }
         } 
         else {
-            image(cover_image, this.position.x * this.size, this.position.y * this.size, this.size, this.size);
+            // Draw covered room
+            if (cover_image) {
+                image(cover_image, this.position.x * this.size, this.position.y * this.size, this.size, this.size);
+            } else {
+                fill(105, 105, 105); // Gray for unknown
+                rect(this.position.x * this.size, this.position.y * this.size, this.size, this.size);
+            }
             noFill();
-            // fill(100);
-            square(this.position.x * this.size, this.position.y * this.size, this.size);
+            rect(this.position.x * this.size, this.position.y * this.size, this.size, this.size);
         }
 
+        // Handle sound effects when agent is in this room
         if (this.containsAgent) {
             if (this.attributes.has("Breeze")) {
-                let playing = false;
-                wind_sound.forEach(sound => {
-                    if (sound.isPlaying()) {
-                        playing = true;
+                if (wind_sound && wind_sound.length > 0) {
+                    let playing = false;
+                    wind_sound.forEach(sound => {
+                        if (sound.isPlaying()) {
+                            playing = true;
+                        }
+                    });
+                    if (!playing) {
+                        let windSound = wind_sound[getRandomInt(wind_sound.length)];
+                        windSound.play();
                     }
-                });
-                if (!playing) {
-                    let windSound = wind_sound[getRandomInt(wind_sound.length)];
-                    windSound.play();
                 }
-            } else {
+            } else if (wind_sound) {
                 wind_sound.forEach(sound => {
                     if (sound.isPlaying()) {
                         sound.stop();
@@ -149,13 +162,66 @@ class Room {
             }
 
             if (this.attributes.has("Stench")) {
-                if (!flies_sound.isPlaying()) {
+                if (flies_sound && !flies_sound.isPlaying()) {
                     flies_sound.loop();
                 }
-            } else {
+            } else if (flies_sound) {
                 flies_sound.stop();
             }
         }
-
     }
+    displayAsUnknown() {
+        // Display unknown rooms as gray squares
+        strokeWeight(1);
+        stroke(30);
+        fill(100); // Gray color for unknown
+        rect(this.position.x * this.size, this.position.y * this.size, this.size, this.size);
+        
+        // Add question mark or unknown indicator
+        fill(200);
+        textSize(this.size / 4);
+        textAlign(CENTER, CENTER);
+        text("?", 
+             this.position.x * this.size + this.size / 2, 
+             this.position.y * this.size + this.size / 2);
+    }
+
+    // Fallback display method for testing
+    displaySimple() {
+        const roomSize = canvasSize / roomsPerRow; // Calculate room size
+        const x = this.position.x * roomSize;
+        const y = this.position.y * roomSize;
+        
+        // Draw room background
+        if (this.visible) {
+            fill(240, 230, 140); // Light yellow for visited
+        } else {
+            fill(105, 105, 105); // Gray for unvisited
+        }
+        
+        stroke(0);
+        strokeWeight(1);
+        rect(x, y, roomSize, roomSize);
+        
+        // Draw text labels
+        fill(0);
+        textAlign(CENTER, CENTER);
+        textSize(10);
+        
+        if (this.visible) {
+            let label = "";
+            if (this.containsWumpus()) label += "W ";
+            if (this.containsPit()) label += "P ";
+            if (this.containsGold()) label += "G ";
+            if (this.containsBreeze()) label += "B ";
+            if (this.containsStench()) label += "S ";
+            
+            if (label) {
+                text(label.trim(), x + roomSize/2, y + roomSize/2 - 5);
+            }
+        } else {
+            text("?", x + roomSize/2, y + roomSize/2);
+        }
+    }
+
 }
