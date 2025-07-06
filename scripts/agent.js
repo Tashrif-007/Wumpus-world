@@ -8,10 +8,6 @@ class Agent {
         this.hasArrow = true;
         this.collectedGold = 0;
         world.showRoom(pos.x, pos.y);
-        // world.showRoom(pos.x - 1, pos.y);
-        // world.showRoom(pos.x, pos.y - 1);
-        // world.showRoom(pos.x + 1, pos.y);
-        // world.showRoom(pos.x, pos.y + 1);
     }
 
     display() {
@@ -25,8 +21,7 @@ class Agent {
         else if (this.direction === 3)
             img = agent_left_image;
         if (this.alive) {
-            var gap = this.world.roomSize / 10
-            image(img, this.position.x * this.world.roomSize + gap, this.position.y * this.world.roomSize + gap, this.world.roomSize - 2 * gap, this.world.roomSize - 2 * gap);
+            image(img, this.position.x * this.world.roomSize, this.position.y * this.world.roomSize, this.world.roomSize, this.world.roomSize);
             if (this.hasArrow) {
                 image(arrow_overlay_image, this.position.x * this.world.roomSize, this.position.y * this.world.roomSize, this.world.roomSize, this.world.roomSize);
             }
@@ -37,109 +32,158 @@ class Agent {
         return this.world.getRoom(this.position.x, this.position.y);
     }
 
-    up() {
-        if (this.alive) {
-            numOfSteps += 1;
-            if (isManualMode) {
-                if (this.direction != 0) {
-                    this.direction = 0;
-                }
-                else if (this.position.y > 0) {
-                    this.position.y--;
-                    this.world.showRoom(this.position.x, this.position.y);
-                }
-            }
+    move(direction) {
+        if (!this.alive) return;
+        numOfSteps ++;
+        const dir = direction;
+        let dx = 0, dy = 0;
+        if (dir === 0) dy = -1;
+        else if (dir === 1) dx = 1;
+        else if (dir === 2) dy = 1;
+        else if (dir === 3) dx = -1;
 
-            else {
-                if (this.direction != 0) {
-                    this.direction = 0;
-                }
-                if (this.position.y > 0) {
-                    this.position.y--;
-                    this.world.showRoom(this.position.x, this.position.y);
-                }
-            }
-            this.checkCurrentRoom();
+        // if (isManualMode) {
+        //     if (this.direction !== dir) {
+        //         this.direction = dir;
+        //     } else {
+        //         if (
+        //             this.position.x + dx >= 0 &&
+        //             this.position.x + dx < this.world.roomsPerRow &&
+        //             this.position.y + dy >= 0 &&
+        //             this.position.y + dy < this.world.roomsPerRow
+        //         ) {
+        //             this.position.x += dx;
+        //             this.position.y += dy;
+        //             this.world.showRoom(this.position.x, this.position.y);
+        //         }
+        //     }
+        // } else {
+
+        if (this.direction !== dir) {
+            this.direction = dir;
         }
+        if (
+            this.position.x + dx >= 0 &&
+            this.position.x + dx < this.world.roomsPerRow &&
+            this.position.y + dy >= 0 &&
+            this.position.y + dy < this.world.roomsPerRow
+        ) {
+            this.position.x += dx;
+            this.position.y += dy;
+            this.world.showRoom(this.position.x, this.position.y);
+        }
+        // }
+        this.checkCurrentRoom();
     }
 
-    right() {
-        if (this.alive) {
-            numOfSteps += 1;
-            if (isManualMode) {
-                if (this.direction != 1) {
-                    this.direction = 1;
-                }
-                else if (this.position.x < this.world.roomsPerRow - 1) {
-                    this.position.x++;
-                    this.world.showRoom(this.position.x, this.position.y);
-                }
-            }
+    up() { this.move(0); }
+    right() { this.move(1); }
+    down() { this.move(2); }
+    left() { this.move(3); }
 
-            else {
-                if (this.direction != 1) {
-                    this.direction = 1;
-                }
-                if (this.position.x < this.world.roomsPerRow - 1) {
-                    this.position.x++;
-                    this.world.showRoom(this.position.x, this.position.y);
-                }
-            }
-            this.checkCurrentRoom();
-        }
-    }
+    // up() {
+    //     if (this.alive) {
+    //         numOfSteps += 1;
+    //         if (isManualMode) {
+    //             if (this.direction != 0) {
+    //                 this.direction = 0;
+    //             }
+    //             else if (this.position.y > 0) {
+    //                 this.position.y--;
+    //                 this.world.showRoom(this.position.x, this.position.y);
+    //             }
+    //         }
 
-    down() {
-        if (this.alive) {
-            numOfSteps += 1;
-            if (isManualMode) {
-                if (this.direction != 2) {
-                    this.direction = 2;
-                }
-                else if (this.position.y < this.world.roomsPerRow - 1) {
-                    this.position.y++;
-                    this.world.showRoom(this.position.x, this.position.y);
-                }
-            }
+    //         else {
+    //             if (this.direction != 0) {
+    //                 this.direction = 0;
+    //             }
+    //             if (this.position.y > 0) {
+    //                 this.position.y--;
+    //                 this.world.showRoom(this.position.x, this.position.y);
+    //             }
+    //         }
+    //         this.checkCurrentRoom();
+    //     }
+    // }
 
-            else {
-                if (this.direction != 2) {
-                    this.direction = 2;
-                }
-                if (this.position.y < this.world.roomsPerRow - 1) {
-                    this.position.y++;
-                    this.world.showRoom(this.position.x, this.position.y);
-                }
-            }
-            this.checkCurrentRoom();
-        }
-    }
+    // right() {
+    //     if (this.alive) {
+    //         numOfSteps += 1;
+    //         if (isManualMode) {
+    //             if (this.direction != 1) {
+    //                 this.direction = 1;
+    //             }
+    //             else if (this.position.x < this.world.roomsPerRow - 1) {
+    //                 this.position.x++;
+    //                 this.world.showRoom(this.position.x, this.position.y);
+    //             }
+    //         }
 
-    left() {
-        if (this.alive) {
-            numOfSteps += 1;
-            if (isManualMode) {
-                if (this.direction != 3) {
-                    this.direction = 3;
-                }
-                else if (this.position.x > 0) {
-                    this.position.x--;
-                    this.world.showRoom(this.position.x, this.position.y);
-                }
-            }
+    //         else {
+    //             if (this.direction != 1) {
+    //                 this.direction = 1;
+    //             }
+    //             if (this.position.x < this.world.roomsPerRow - 1) {
+    //                 this.position.x++;
+    //                 this.world.showRoom(this.position.x, this.position.y);
+    //             }
+    //         }
+    //         this.checkCurrentRoom();
+    //     }
+    // }
 
-            else {
-                if (this.direction != 3) {
-                    this.direction = 3;
-                }
-                if (this.position.x > 0) {
-                    this.position.x--;
-                    this.world.showRoom(this.position.x, this.position.y);
-                }
-            }
-            this.checkCurrentRoom();
-        }
-    }
+    // down() {
+    //     if (this.alive) {
+    //         numOfSteps += 1;
+    //         if (isManualMode) {
+    //             if (this.direction != 2) {
+    //                 this.direction = 2;
+    //             }
+    //             else if (this.position.y < this.world.roomsPerRow - 1) {
+    //                 this.position.y++;
+    //                 this.world.showRoom(this.position.x, this.position.y);
+    //             }
+    //         }
+
+    //         else {
+    //             if (this.direction != 2) {
+    //                 this.direction = 2;
+    //             }
+    //             if (this.position.y < this.world.roomsPerRow - 1) {
+    //                 this.position.y++;
+    //                 this.world.showRoom(this.position.x, this.position.y);
+    //             }
+    //         }
+    //         this.checkCurrentRoom();
+    //     }
+    // }
+
+    // left() {
+    //     if (this.alive) {
+    //         numOfSteps += 1;
+    //         if (isManualMode) {
+    //             if (this.direction != 3) {
+    //                 this.direction = 3;
+    //             }
+    //             else if (this.position.x > 0) {
+    //                 this.position.x--;
+    //                 this.world.showRoom(this.position.x, this.position.y);
+    //             }
+    //         }
+
+    //         else {
+    //             if (this.direction != 3) {
+    //                 this.direction = 3;
+    //             }
+    //             if (this.position.x > 0) {
+    //                 this.position.x--;
+    //                 this.world.showRoom(this.position.x, this.position.y);
+    //             }
+    //         }
+    //         this.checkCurrentRoom();
+    //     }
+    // }
 
     checkCurrentRoom() {
         if (this.world.getRoom(this.position.x, this.position.y).containsWumpus() && this.world.wumpus.alive) {
@@ -267,12 +311,7 @@ class Agent {
                 }
                 break;
         }
-        agent 
-        Breeze
-        gold
-        Pit
-        world 
-        wompos
+
         if (victory) {
             this.world.showRoom(this.world.wumpus.position.x, this.world.wumpus.position.y);
             this.world.wumpus.kill();
