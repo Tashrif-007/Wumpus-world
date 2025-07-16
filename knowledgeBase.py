@@ -14,9 +14,9 @@ class PropositionalKB:
         self.playing_grid = [["0" for _ in range(grid_size)] for _ in range(grid_size)]
         self.playing_grid[0][0] = "1"
         self.gold_cell = None
-        self.cell_confidence = {}  # (x,y) -> {'pit': confidence, 'wumpus': confidence}
-        self.has_arrow = True  # NEW: Track if arrow is available
-        self.arrow_used = False  # NEW: Track if arrow has been used
+        self.cell_confidence = {}  
+        self.has_arrow = True  
+        self.arrow_used = False 
         self.last_arrow_target = None
 
     def add_fact(self, fact: str):
